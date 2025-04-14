@@ -1,0 +1,27 @@
+library
+  exposed-modules:
+      Models.Trabajador
+      Models.Herramienta
+      Models.Parcela
+      Models.Cosecha
+      Controllers.Menu
+      Controllers.Herramientas
+      Controllers.Parcelas
+      Controllers.Cosechas
+      Controllers.Trabajadores
+      Utils.FileIO
+      Utils.Validaciones
+      Utils.Generadores
+  hs-source-dirs: src
+  ghc-options: -Wall
+  build-depends: base >=4.7 && <5
+  default-language: Haskell2010
+
+executable proyecto2-GestionFincaAgricola
+  main-is: Main.hs
+  hs-source-dirs: src
+  ghc-options: -Wall
+  build-depends:
+      base,
+      proyecto2-GestionFincaAgricola
+  default-language: Haskell2010

@@ -1,0 +1,34 @@
+name:                proyecto2-GestionFincaAgricola
+version:             0.1.0.0
+license:             MIT
+author:              Duan Espinoza
+maintainer:          75913012+Duan-Espinoza@users.noreply.github.com
+extra-source-files:  []
+
+dependencies:
+  - base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+  exposed-modules:
+      Models.Trabajador
+      Models.Herramienta
+      Models.Parcela
+      Models.Cosecha
+      Controllers.Menu
+      Controllers.Herramientas
+      Controllers.Parcelas
+      Controllers.Cosechas
+      Controllers.Trabajadores
+      Utils.FileIO
+      Utils.Validaciones
+      Utils.Generadores
+  ghc-options: -Wall
+
+executables:
+  proyecto2-GestionFincaAgricola:
+    main:                Main.hs
+    source-dirs:         src
+    ghc-options:         -Wall
+    dependencies:
+      - base
