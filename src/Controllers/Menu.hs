@@ -1,16 +1,34 @@
--- Archivo: Controllers/Menu.hs
---  Módulo Controllers.Menu
---  Funciones para mostrar el menú principal y gestionar la interacción con el usuario
+{-|
+Module      : Controllers.Menu
+Description : Módulo para gestionar el menú principal y la interacción del usuario con el sistema.
+Copyright   : (c) 2025
+License     : MIT
+Maintainer  : geovanniga32@gmail.com
+Stability   : experimental
+Portability : portable
+
+Este módulo contiene las funciones necesarias para iniciar el sistema, autenticar a los trabajadores mediante su cédula,
+mostrar las opciones del menú principal, y dirigir a submenús operativos o generales según el rol del trabajador.
+
+== Funcionalidades
+
+* Inicio del sistema y presentación del menú principal.
+* Validación de acceso mediante la cédula de trabajadores.
+* Menús operativos para gestión de herramientas, parcelas y reportes.
+* Opciones generales informativas.
+
+Este controlador actúa como el punto de entrada principal al sistema de gestión de finca agrícola.
+-}
+
 module Controllers.Menu (mostrarMenuInicio) where
 
--- Importaciones 
+-- Importaciones
 import System.IO ( hFlush, stdout )
 import Models.Trabajador (Trabajador, trabajadoresIniciales)
 import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
-import System.IO (hFlush, stdout)
+import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
 
-
--- Función principal para iniciar el sistema
+-- | Función principal que muestra el título del sistema y lanza el menú principal.
 mostrarMenuInicio :: IO ()
 mostrarMenuInicio = do
     putStrLn "\n======================================="
@@ -18,14 +36,20 @@ mostrarMenuInicio = do
     putStrLn "======================================="
     menuPrincipal
 
--- Menú Principal
+-- | Muestra el menú principal y gestiona la navegación inicial del sistema.
+--
+-- Ofrece las siguientes opciones:
+--
+-- 1. Acceso a opciones operativas (requiere autenticación)
+-- 2. Acceso a opciones generales
+-- 3. Salir del sistema
 menuPrincipal :: IO ()
 menuPrincipal = do
     putStrLn "\n--- Menú Principal ---"
     putStrLn "1. Opciones Operativas"
     putStrLn "2. Opciones Generales"
     putStrLn "3. Salir"
-    putStr "Seleccione una opción: "
+    putStr   "Seleccione una opción: "
     hFlush stdout
     opcion <- getLine
     case opcion of
@@ -36,7 +60,10 @@ menuPrincipal = do
             putStrLn "\n Opción inválida. Intente de nuevo."
             menuPrincipal
 
--- Autenticación del trabajador por cédula
+-- | Solicita la cédula del trabajador y valida su acceso.
+--
+-- Si la cédula es válida, se muestra su información y se accede al menú operativo.
+-- En caso contrario, permite reintentar la autenticación.
 autenticarTrabajador :: IO ()
 autenticarTrabajador = do
     putStr   "\nIngrese su cédula: "
@@ -48,11 +75,17 @@ autenticarTrabajador = do
             mostrarInformacionTrabajador t
             menuOperativo t
         Nothing -> do
-            hFlush stdout
             putStrLn "\n Cédula no registrada. Intente de nuevo."
             autenticarTrabajador
 
--- Menú Operativo (funciones a implementar)
+-- | Muestra el menú operativo para trabajadores autenticados.
+--
+-- Ofrece opciones como:
+--
+-- 1. Cargar y mostrar herramientas desde archivo
+-- 2. Registrar y mostrar parcelas de cultivo (por implementar)
+-- 3. Ver informe de cosechas (por implementar)
+-- 4. Volver al menú principal
 menuOperativo :: Trabajador -> IO ()
 menuOperativo t = do
     putStrLn "\n--- Opciones Operativas ---"
@@ -65,7 +98,8 @@ menuOperativo t = do
     opcion <- getLine
     case opcion of
         "1" -> do
-            putStrLn "\n(Función herramientas aún no implementada)"
+            nuevas <- cargarHerramientasDesdeArchivo [] 
+            -- Posible implementación futura: mostrarHerramientas nuevas
             menuOperativo t
         "2" -> do
             putStrLn "\n (Función parcelas aún no implementada)"
@@ -78,7 +112,9 @@ menuOperativo t = do
             putStrLn "\n Opción inválida. Intente de nuevo."
             menuOperativo t
 
--- Opciones Generales
+-- | Muestra el submenú de opciones generales.
+--
+-- Incluye funcionalidades informativas como estadísticas (por implementar) e información general de la finca.
 opcionesGenerales :: IO ()
 opcionesGenerales = do
     putStrLn "\n--- Opciones Generales ---"
