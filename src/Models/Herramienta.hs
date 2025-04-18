@@ -38,7 +38,7 @@ data Herramienta = Herramienta
   , nombre      :: String  -- ^ Nombre identificativo.
   , descripcion :: String  -- ^ Descripción detallada de la herramienta.
   , tipo        :: String  -- ^ Categoría o tipo de herramienta.
-  } deriving (Show, Eq)
+  } deriving (Show,Read, Eq)
 
 -- | Compara dos herramientas por su código.
 --

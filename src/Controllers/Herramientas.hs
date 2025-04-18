@@ -21,6 +21,7 @@ separados por comas.
 
 module Controllers.Herramientas (
     cargarHerramientasDesdeArchivo
+    , mostrarHerramientas
 ) where
 
 -- Importaciones
@@ -86,8 +87,6 @@ cargarHerramientasDesdeArchivo actuales = do
             let unicos = filter (\h -> notElem (codigo h) (map codigo actuales)) nuevasValidas
             let actualizadas = nubBy igualCodigo (actuales ++ unicos)
             
-            putStrLn "\nHerramientas nuevas registradas:"
-            mapM_ (putStrLn . ("* " ++) . nombre) unicos
             
             putStrLn "\nLista total de herramientas registradas:"
             mapM_ mostrarHerramienta actualizadas
@@ -106,3 +105,15 @@ mostrarHerramienta h = do
     putStrLn $ "  Descripción: " ++ descripcion h
     putStrLn $ "  Tipo: " ++ tipo h
     putStrLn ""
+
+-- | Mostrar todas las herramientas registradas en el sistema.
+--
+-- Esta función imprime la lista de herramientas registradas
+--
+-- @param herramientas Lista de herramientas a mostrar.
+-- @return Lista de herramientas mostradas.
+mostrarHerramientas :: [Herramienta] -> IO ()
+mostrarHerramientas herramientas = do
+    putStrLn "\nLista de herramientas registradas:"
+    mapM_ mostrarHerramienta herramientas
+

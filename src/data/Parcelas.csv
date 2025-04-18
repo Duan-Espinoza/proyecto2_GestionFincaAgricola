@@ -1,0 +1,2 @@
+P1004,P001,Norte,300.0,Yuca,Yuca:500.0,Herramienta {codigo = "HR001", nombre = "Desmalezadora", descripcion = "Elimina maleza entre cultivos", tipo = "motorizada"}
+P1004,Parcela,Xur,200.0,Maiz,Maiz:500.0,Herramienta {codigo = "HR003", nombre = "Tractor", descripcion = "Automatiza labores de labranza", tipo = "automatizada"}

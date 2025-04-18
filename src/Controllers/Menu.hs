@@ -27,6 +27,9 @@ import System.IO ( hFlush, stdout )
 import Models.Trabajador (Trabajador, trabajadoresIniciales)
 import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
 import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
+import Controllers.Parcelas (registrarParcela, consultarParcela)
+import Models.Herramienta (Herramienta)
+
 
 -- | Función principal que muestra el título del sistema y lanza el menú principal.
 mostrarMenuInicio :: IO ()
@@ -73,7 +76,7 @@ autenticarTrabajador = do
     case trabajador of
         Just t -> do
             mostrarInformacionTrabajador t
-            menuOperativo t
+            menuOperativo t []
         Nothing -> do
             putStrLn "\n Cédula no registrada. Intente de nuevo."
             autenticarTrabajador
@@ -83,11 +86,13 @@ autenticarTrabajador = do
 -- Ofrece opciones como:
 --
 -- 1. Cargar y mostrar herramientas desde archivo
--- 2. Registrar y mostrar parcelas de cultivo (por implementar)
+-- 2. Registrar y mostrar parcelas de cultivo 
 -- 3. Ver informe de cosechas (por implementar)
 -- 4. Volver al menú principal
-menuOperativo :: Trabajador -> IO ()
-menuOperativo t = do
+--
+-- El menú se actualiza dinámicamente según las herramientas cargadas.
+menuOperativo :: Trabajador -> [Herramienta] -> IO ()
+menuOperativo t herramientas = do
     putStrLn "\n--- Opciones Operativas ---"
     putStrLn "1. Cargar y Mostrar Herramientas de Campo"
     putStrLn "2. Registrar y Mostrar Parcelas de Cultivo"
@@ -98,19 +103,29 @@ menuOperativo t = do
     opcion <- getLine
     case opcion of
         "1" -> do
-            nuevas <- cargarHerramientasDesdeArchivo [] 
-            -- Posible implementación futura: mostrarHerramientas nuevas
-            menuOperativo t
+            nuevas <- cargarHerramientasDesdeArchivo []
+            let nuevasDetectadas = filter (`notElem` herramientas) nuevas
+            if null nuevasDetectadas
+                then do
+                    putStrLn "\n No se detectaron nuevas herramientas."
+                    menuOperativo t herramientas
+                else do
+                    putStrLn "\n--- Nuevas herramientas agregadas ---"
+                    mapM_ print nuevasDetectadas
+                    let herramientasActualizadas = herramientas ++ nuevasDetectadas
+                    menuOperativo t herramientasActualizadas
+
         "2" -> do
-            putStrLn "\n (Función parcelas aún no implementada)"
-            menuOperativo t
+            parcelas <- registrarParcela [] herramientas
+            menuOperativo t herramientas
         "3" -> do
             putStrLn "\n (Informe de cosechas aún no implementado)"
-            menuOperativo t
+            menuOperativo t herramientas
         "4" -> menuPrincipal
         _   -> do
             putStrLn "\n Opción inválida. Intente de nuevo."
-            menuOperativo t
+            menuOperativo t herramientas
+
 
 -- | Muestra el submenú de opciones generales.
 --
