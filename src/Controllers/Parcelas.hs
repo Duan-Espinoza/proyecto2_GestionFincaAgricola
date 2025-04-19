@@ -1,10 +1,8 @@
-{-|
-Module      : Controllers.Parcelas
-Description : Funciones para registrar y consultar parcelas de cultivo.
--}
 module Controllers.Parcelas (
     registrarParcela,
-    consultarParcela
+    consultarParcela,
+    leerParcelas,
+    csvToParcela
 ) where
 
 import Models.Parcela (Parcela(..))
@@ -42,7 +40,7 @@ registrarParcela parcelas herramientas = do
     codigoParcela <- generarCodigoParcela herramientas
     let nuevaParcela = Parcela codigoParcela nombre zona area vegetal precio herramientasSeleccionadas
     guardarParcela nuevaParcela
-    return (parcelas ++ [nuevaParcela])
+    return (parcelas ++ [nuevaParcela]) 
 
 
 -- | Guardar una parcela en el archivo CSV
@@ -71,12 +69,20 @@ parsePrecio str =
 -- | Consultar una parcela por su código
 consultarParcela :: [Parcela] -> IO ()
 consultarParcela parcelas = do
-    putStrLn "\n--- Consulta de Parcela ---"
-    cod <- pedirInput "Ingrese el código de la parcela: "
-    let parcelaEncontrada = buscarParcela cod parcelas
-    case parcelaEncontrada of
-        Just parcela -> mostrarParcela parcela
-        Nothing -> putStrLn "Parcela no encontrada."
+    --Verificar lista de parcelas
+    if null parcelas
+        then do
+            putStrLn "No hay parcelas registradas."
+            return ()
+        else do
+            putStrLn "\n--- Consulta de Parcela ---"
+            cod <- pedirInput "Ingrese el código de la parcela a consultar: "
+            let parcelaEncontrada = buscarParcela cod parcelas
+            case parcelaEncontrada of
+                Just parcela -> do
+                    mostrarParcela parcela
+                    
+                Nothing -> putStrLn "Parcela no encontrada."
 
 -- | Buscar una parcela por su código
 buscarParcela :: String -> [Parcela] -> Maybe Parcela
@@ -89,6 +95,14 @@ buscarParcela cod parcelas =
 mostrarParcela :: Parcela -> IO ()
 mostrarParcela parcela = do
     putStrLn $ "\nInformación de la Parcela:"
+    putStrLn $ "Código: " ++ codigo parcela
+    putStrLn $ "Nombre: " ++ nombre parcela
+    putStrLn $ "Zona: " ++ zona parcela
+    putStrLn $ "Área: " ++ show (area parcela) ++ " m²"
+    putStrLn $ "Vegetal: " ++ vegetal parcela
+    putStrLn $ "Precio por kilo: " ++ precio parcela
+    putStrLn $ "Herramientas asignadas: " ++ intercalate ", " (map H.codigo (herramientas parcela))
+    
 
 
 -- | Leer las parcelas desde el archivo CSV

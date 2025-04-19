@@ -27,7 +27,7 @@ import System.IO ( hFlush, stdout )
 import Models.Trabajador (Trabajador, trabajadoresIniciales)
 import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
 import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
-import Controllers.Parcelas (registrarParcela, consultarParcela)
+import Controllers.Parcelas (registrarParcela, consultarParcela, leerParcelas, csvToParcela)
 import Models.Herramienta (Herramienta)
 
 
@@ -116,8 +116,20 @@ menuOperativo t herramientas = do
                     menuOperativo t herramientasActualizadas
 
         "2" -> do
-            parcelas <- registrarParcela [] herramientas
-            menuOperativo t herramientas
+            putStrLn "Menu de Parcelas"
+            putStrLn "1. Consultar Parcela"
+            putStrLn "2. Registrar Parcela"
+            putStr   "Seleccione una opción: "
+            hFlush stdout
+            opcionParcela <- getLine
+            case opcionParcela of
+                "1" -> do
+                    parcelas <- leerParcelas herramientas
+                    consultarParcela parcelas
+                    menuOperativo t herramientas
+                "2" -> do
+                    parcelas <- registrarParcela [] herramientas
+                    menuOperativo t herramientas
         "3" -> do
             putStrLn "\n (Informe de cosechas aún no implementado)"
             menuOperativo t herramientas
@@ -150,3 +162,5 @@ opcionesGenerales = do
         _   -> do
             putStrLn "\n Opción inválida. Intente de nuevo."
             opcionesGenerales
+
+
