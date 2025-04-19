@@ -87,17 +87,15 @@ cargarHerramientasDesdeArchivo actuales = do
             let unicos = filter (\h -> notElem (codigo h) (map codigo actuales)) nuevasValidas
             let actualizadas = nubBy igualCodigo (actuales ++ unicos)
             
-            
             putStrLn "\nLista total de herramientas registradas:"
             mapM_ mostrarHerramienta actualizadas
-            
             return actualizadas
 
 -- | Muestra la información de una herramienta en la consola.
---
 -- Esta función imprime los detalles de una herramienta, incluyendo su código, nombre, descripción y tipo.
---
 -- @param h La herramienta que se desea mostrar.
+-- @return Herramienta mostrada.
+--
 mostrarHerramienta :: Herramienta -> IO ()
 mostrarHerramienta h = do
     putStrLn $ "- Código: " ++ codigo h
@@ -107,7 +105,6 @@ mostrarHerramienta h = do
     putStrLn ""
 
 -- | Mostrar todas las herramientas registradas en el sistema.
---
 -- Esta función imprime la lista de herramientas registradas
 --
 -- @param herramientas Lista de herramientas a mostrar.

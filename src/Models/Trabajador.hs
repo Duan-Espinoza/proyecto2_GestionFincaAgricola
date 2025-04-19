@@ -46,11 +46,13 @@ data Trabajador = Trabajador
 -- Esta lista puede ser usada como punto de partida para la ejecución de la aplicación.
 trabajadoresIniciales :: [Trabajador]
 trabajadoresIniciales =
+
   [ Trabajador "101010101" "Geovanni González" "Agrónomo"
   , Trabajador "202020202" "Antonio Gutierrez" "Supervisor"
   , Trabajador "303030303" "Moises Duran" "Operario"
   , Trabajador "404040404" "Dariel Mendez" "Operario"
   , Trabajador "505050505" "Nehemias Flores" "Supervisor"
+  , Trabajador "606060606" "Lucia Martinez" "Administrativa"
   ]
 
 -- | Busca un trabajador en una lista a partir de su cédula.

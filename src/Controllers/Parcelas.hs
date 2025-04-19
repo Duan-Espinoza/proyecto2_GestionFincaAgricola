@@ -24,7 +24,7 @@ import qualified Control.Exception as E
 
 -- Ruta del archivo CSV
 filePath :: FilePath
-filePath  = "C:\\Users\\geova\\Github Desktop Repos\\proyecto2_GestionFincaAgricola\\src\\data\\par.csv"
+filePath  = "C:\\Users\\geova\\Github Desktop Repos\\proyecto2_GestionFincaAgricola\\src\\data\\Parcelas.csv"
 
 
 -- | Registrar una nueva parcela, pidiendo información al usuario.
@@ -58,9 +58,6 @@ guardarParcela parcela = do
             appendFile filePath (parcelaToCSV parcela ++ "\n")
             putStrLn "Parcela guardada."
         
-    
-
-
 -- | Función para parsear el precio de cada vegetal en el formato: vegetal:precio
 parsePrecio :: String -> Maybe (String, Double)
 parsePrecio str =
@@ -100,13 +97,13 @@ leerParcelas herramientasDisponibles = do
     existe <- doesFileExist filePath
     if not existe
         then return []
-        else E.bracket (openFile filePath ReadMode) hClose $ \handle -> do
-            contenido <- hGetContents handle
-            let lineas = lines contenido
-                parcelas = map (flip csvToParcela herramientasDisponibles) lineas
-            return parcelas
-
-
+        else do
+            contenido <- readFile filePath
+            length contenido `seq` do
+                let lineas = lines contenido
+                    parcelas = map (flip csvToParcela herramientasDisponibles) lineas
+                return parcelas
+        
 
 -- | Convertir una parcela a formato CSV
 parcelaToCSV :: Parcela -> String
@@ -121,9 +118,6 @@ parcelaToCSV parcela =
         intercalate ";" (map H.codigo (herramientas parcela))  -- Guardar solamente el código de la herramienta
     ]
 
-
-        
-    
 -- | Convertir una línea CSV a una parcela
 csvToParcela :: String -> [Herramienta] -> Parcela
 csvToParcela str herramientasDisponibles =
