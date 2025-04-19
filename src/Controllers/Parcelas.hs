@@ -103,7 +103,6 @@ leerParcelas herramientasDisponibles = do
                 let lineas = lines contenido
                     parcelas = map (flip csvToParcela herramientasDisponibles) lineas
                 return parcelas
-        
 
 -- | Convertir una parcela a formato CSV
 parcelaToCSV :: Parcela -> String
