@@ -1,2 +1,35 @@
-# proyecto2_GestionFincaAgricola
-El objetivo de este proyecto es desarrollar un sistema para gestionar las operaciones agrícolas  dentro de una finca productora de vegetales. 
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Firma_TEC.svg/1200px-Firma_TEC.svg.png" alt="Logo" width="500" height="80">
+  </a>
+
+  <h3 align="center">Proyecto 2: Gestión de Finca Agrícola 
+
+  <p align="center">
+    Lenguajes de programación
+  </p>
+  <p align="center">
+    Profesor: Allan Gabriel Rodriguez Davila
+  </p>
+
+  <p align="center">
+    DUAN ANTONIO ESPINOZA OLIVARES
+  </p>
+
+  <p align="center">
+    GEOVANNI FRANCISCO GONZALEZ AGUILAR
+  </p>
+ 
+  <br /> 
+  <p align="center">
+    I Semestre 2025
+  </p> 
+ 
+  <p align="center">
+    Enlace del diagrama UML: 
+  
+   
+  <p align="center">
+</div>
