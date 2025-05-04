@@ -1,4 +1,8 @@
 module Main where
 
+import Controllers.Menu (mostrarMenuInicio)
+
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = do
+    putStrLn "Iniciando el sistema..."
+    mostrarMenuInicio
