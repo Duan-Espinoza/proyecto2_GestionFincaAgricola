@@ -29,6 +29,7 @@ import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
 import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
 import Controllers.Parcelas (registrarParcela, consultarParcela, leerParcelas, csvToParcela)
 import Models.Herramienta (Herramienta)
+import Controllers.Cosechas (menuGestionCosechas)
 
 
 -- | Función principal que muestra el título del sistema y lanza el menú principal.
@@ -142,25 +143,29 @@ menuOperativo t herramientas = do
 -- | Muestra el submenú de opciones generales.
 --
 -- Incluye funcionalidades informativas como estadísticas (por implementar) e información general de la finca.
+-- | Muestra el submenú de opciones generales.
 opcionesGenerales :: IO ()
 opcionesGenerales = do
     putStrLn "\n--- Opciones Generales ---"
-    putStrLn "1. Ver estadísticas generales"
-    putStrLn "2. Ver información de la finca"
-    putStrLn "3. Volver al Menú Principal"
+    putStrLn "1. Gestión de Cosechas"
+    putStrLn "2. Ver estadísticas generales"
+    putStrLn "3. Ver información de la finca"
+    putStrLn "4. Volver al Menú Principal"
     putStr   "Seleccione una opción: "
     hFlush stdout
     opcion <- getLine
     case opcion of
         "1" -> do
-            putStrLn "\n (Función estadísticas aún no implementada)"
+            menuGestionCosechas
             opcionesGenerales
         "2" -> do
+            putStrLn "\n (Función estadísticas aún no implementada)"
+            opcionesGenerales
+        "3" -> do
             putStrLn "\n (Función información de finca aún no implementada)"
             opcionesGenerales
-        "3" -> menuPrincipal
+        "4" -> menuPrincipal
         _   -> do
             putStrLn "\n Opción inválida. Intente de nuevo."
             opcionesGenerales
-
 
