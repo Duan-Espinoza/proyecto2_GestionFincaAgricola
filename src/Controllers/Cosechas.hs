@@ -24,21 +24,24 @@ import Text.Read (readMaybe)
 cosechasPath :: FilePath
 cosechasPath = "src/data/Cosechas.csv"
 
+-- En Controllers/Cosechas.hs
 registrarCosecha :: IO ()
 registrarCosecha = do
     putStrLn "\n--- Registrar Nueva Cosecha ---"
-    putStr "ID Trabajador: "
+    -- Añadir hFlush para asegurar que el prompt se muestre antes de la entrada del usuario
+    putStr "ID Trabajador: " >> hFlush stdout
     tid <- getLine
-    putStr "ID Parcela: "
+    putStr "ID Parcela: " >> hFlush stdout
     pid <- getLine
-    putStr "Fecha Inicio (YYYY-MM-DD): "
+    putStr "Fecha Inicio (YYYY-MM-DD): " >> hFlush stdout
     fi <- getLine
-    putStr "Fecha Fin (YYYY-MM-DD): "
+    putStr "Fecha Fin (YYYY-MM-DD): " >> hFlush stdout
     ff <- getLine
-    putStr "Vegetal: "
+    putStr "Vegetal: " >> hFlush stdout
     veg <- getLine
-    putStr "Cantidad (kg): "
+    putStr "Cantidad (kg): " >> hFlush stdout
     cantStr <- getLine
+    -- ...
 
     let mtrabajador = find ((== tid) . cedula) trabajadoresIniciales
     mparcelas <- leerParcelas []
@@ -126,6 +129,7 @@ actualizarEstado c nuevoEstado = do
 
 
 -- | Función para mostrar el menú de gestión de cosechas
+-- En Controllers/Cosechas.hs
 menuGestionCosechas :: IO ()
 menuGestionCosechas = do
     putStrLn "\n--- Menú de Gestión de Cosechas ---"
@@ -134,14 +138,15 @@ menuGestionCosechas = do
     putStrLn "3. Cerrar Cosecha"
     putStrLn "4. Modificar Cosecha"
     putStrLn "5. Cancelar Cosecha"
-    putStrLn "6. Salir"
+    putStrLn "6. Volver al Menú Principal"
     putStr "Seleccione una opción: "
+    hFlush stdout  -- <- Añadir esto para asegurar que el prompt se muestre antes de la entrada del usuario
     opcion <- getLine
     case opcion of
-        "1" -> registrarCosecha
-        "2" -> consultarCosecha
-        "3" -> cerrarCosecha
-        "4" -> modificarCosecha
-        "5" -> cancelarCosecha
-        "6" -> putStrLn "Saliendo del menú..."
+        "1" -> registrarCosecha >> menuGestionCosechas
+        "2" -> consultarCosecha >> menuGestionCosechas
+        "3" -> cerrarCosecha >> menuGestionCosechas
+        "4" -> modificarCosecha >> menuGestionCosechas
+        "5" -> cancelarCosecha >> menuGestionCosechas
+        "6" -> putStrLn "Volviendo al menú principal..." >> return ()
         _   -> putStrLn "Opción inválida, intente nuevamente." >> menuGestionCosechas

@@ -37,7 +37,9 @@ executable proyecto2-GestionFincaAgricola
     Controllers.Herramientas
     Controllers.Menu
     Controllers.Trabajadores
+    Controllers.Cosechas
     Models.Herramienta
+    Models.Cosecha
     Paths_proyecto2_GestionFincaAgricola
   hs-source-dirs: src
   ghc-options: -Wall
