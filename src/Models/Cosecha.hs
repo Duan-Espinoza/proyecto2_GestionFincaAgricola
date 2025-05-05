@@ -44,22 +44,23 @@ cosechaToCSV c = intercalate "," [
     vegetal c,
     show (cantidad c),
     show (estado c)
-]
+    ]
 
 csvToCosecha :: String -> Maybe Cosecha
 csvToCosecha linea = case split ',' linea of
     [idC, tid, pid, fini, ffin, veg, cant, est] -> 
         case (parsearFecha fini, parsearFecha ffin, readMaybe cant, readMaybe est) of
-            (Just fi, Just ff, Just c, Just e) -> Just Cosecha {
-                idCosecha = idC,
-                trabajadorId = tid,
-                parcelaId = pid,
-                fechaInicio = fi,
-                fechaFin = ff,
-                vegetal = veg,
-                cantidad = c,
-                estado = e
-            }
+            (Just fi, Just ff, Just c, Just e) -> 
+                Just Cosecha
+                    { idCosecha = idC
+                    , trabajadorId = tid
+                    , parcelaId = pid
+                    , fechaInicio = fi
+                    , fechaFin = ff
+                    , vegetal = veg
+                    , cantidad = c
+                    , estado = e
+                    }
             _ -> Nothing
     _ -> Nothing
 

@@ -10,15 +10,16 @@ module Controllers.Cosechas (
 ) where
 
 import Models.Cosecha
-import Models.Parcela (Parcela(vegetal, codigo))
+import Models.Parcela as P (Parcela(vegetal, codigo))
 import Models.Trabajador (trabajadoresIniciales, Trabajador(cedula))
 import Controllers.Parcelas (leerParcelas)
 import System.IO
 import Data.List (find, intercalate)
-import Data.Maybe (fromJust, isJust)
+import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Time (Day)
 import System.Directory (doesFileExist)
 import Control.Exception (catch, IOException)
+import Text.Read (readMaybe)
 
 cosechasPath :: FilePath
 cosechasPath = "src/data/Cosechas.csv"
@@ -40,11 +41,11 @@ registrarCosecha = do
     cantStr <- getLine
 
     let mtrabajador = find ((== tid) . cedula) trabajadoresIniciales
-        mparcelas = leerParcelas []
-        mparcela = find ((== pid) . codigo) mparcelas
+    mparcelas <- leerParcelas []
+    let mparcela = find ((== pid) . codigo) mparcelas
 
     case (mtrabajador, mparcela) of
-        (Just t, Just p) | vegetal p == veg -> do
+        (Just t, Just p) | P.vegetal p == veg -> do
             case (parsearFecha fi, parsearFecha ff, readMaybe cantStr) of
                 (Just fechaI, Just fechaF, Just cant) -> do
                     disponible <- verDisponibilidadParcela pid fechaI fechaF
@@ -77,6 +78,7 @@ cerrarCosecha = do
         Just c -> actualizarEstado c Completada
         Nothing -> putStrLn "Cosecha no encontrada"
 
+
 modificarCosecha :: IO ()
 modificarCosecha = do
     putStr "ID Cosecha: "
@@ -84,8 +86,7 @@ modificarCosecha = do
     cosechas <- leerCosechas
     case find ((== idC) . idCosecha) cosechas of
         Just c -> do
-            -- Lógica de modificación
-            actualizarCosecha c
+            putStrLn "Funcionalidad de modificación pendiente."
         Nothing -> putStrLn "Cosecha no encontrada"
 
 cancelarCosecha :: IO ()
@@ -122,3 +123,25 @@ actualizarEstado c nuevoEstado = do
     cosechas <- leerCosechas
     let updated = map (\x -> if idCosecha x == idCosecha c then x { estado = nuevoEstado } else x) cosechas
     writeFile cosechasPath (unlines (map cosechaToCSV updated))
+
+
+-- | Función para mostrar el menú de gestión de cosechas
+menuGestionCosechas :: IO ()
+menuGestionCosechas = do
+    putStrLn "\n--- Menú de Gestión de Cosechas ---"
+    putStrLn "1. Registrar Cosecha"
+    putStrLn "2. Consultar Cosecha"
+    putStrLn "3. Cerrar Cosecha"
+    putStrLn "4. Modificar Cosecha"
+    putStrLn "5. Cancelar Cosecha"
+    putStrLn "6. Salir"
+    putStr "Seleccione una opción: "
+    opcion <- getLine
+    case opcion of
+        "1" -> registrarCosecha
+        "2" -> consultarCosecha
+        "3" -> cerrarCosecha
+        "4" -> modificarCosecha
+        "5" -> cancelarCosecha
+        "6" -> putStrLn "Saliendo del menú..."
+        _   -> putStrLn "Opción inválida, intente nuevamente." >> menuGestionCosechas
