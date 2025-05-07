@@ -91,15 +91,38 @@ mostrarDetalleCosecha c = do
     putStrLn $ "Estado:        " ++ show (estado c)
     putStrLn "==========================="
 
+-- Modificar la función cerrarCosecha
 cerrarCosecha :: IO ()
 cerrarCosecha = do
-    putStr "ID Cosecha: "
+    putStr "ID Cosecha: " >> hFlush stdout
     idC <- getLine
     cosechas <- leerCosechas
-    let mc = find ((== idC) . idCosecha) cosechas
-    case mc of
-        Just c -> actualizarEstado c Completada
+    case find ((== idC) . idCosecha) cosechas of
+        Just c -> do
+            case estado c of
+                Completada -> putStrLn "La cosecha ya está cerrada."
+                Cancelada -> putStrLn "No se puede cerrar una cosecha cancelada."
+                _ -> do
+                    putStr "Cantidad recolectada real (kg): " >> hFlush stdout
+                    recolectadoStr <- getLine
+                    case readMaybe recolectadoStr of
+                        Just recolectado | recolectado >= 0 -> do
+                            let cActualizada = c {
+                                cantidad = recolectado,
+                                estado = Completada
+                            }
+                            actualizarCosecha cActualizada
+                            putStrLn "Cosecha cerrada exitosamente."
+                        _ -> putStrLn "Cantidad inválida"
         Nothing -> putStrLn "Cosecha no encontrada"
+
+-- Añadir nueva función de actualización completa
+actualizarCosecha :: Cosecha -> IO ()
+actualizarCosecha cActualizada = do
+    cosechas <- leerCosechas
+    let actualizadas = map (\c -> if idCosecha c == idCosecha cActualizada then cActualizada else c) cosechas
+    withFile cosechasPath WriteMode $ \handle -> 
+        hPutStr handle (unlines (map cosechaToCSV actualizadas))
 
 
 modificarCosecha :: IO ()
