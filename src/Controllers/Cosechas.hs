@@ -69,14 +69,27 @@ registrarCosecha = do
                 _ -> putStrLn "Error en fechas o cantidad"
         _ -> putStrLn "Validación fallida: Trabajador/Parcela/Vegetal incorrecto"
 
+-- Modificar la función consultarCosecha
 consultarCosecha :: IO ()
 consultarCosecha = do
-    putStr "ID Cosecha: "
+    putStr "ID Cosecha: " >> hFlush stdout
     idC <- getLine
     cosechas <- leerCosechas
     case find ((== idC) . idCosecha) cosechas of
-        Just c -> putStrLn $ show c
+        Just c -> mostrarDetalleCosecha c
         Nothing -> putStrLn "Cosecha no encontrada"
+
+mostrarDetalleCosecha :: Cosecha -> IO ()
+mostrarDetalleCosecha c = do
+    putStrLn "\n=== Detalle de Cosecha ==="
+    putStrLn $ "ID:            " ++ idCosecha c
+    putStrLn $ "Trabajador:    " ++ trabajadorId c
+    putStrLn $ "Parcela:       " ++ parcelaId c
+    putStrLn $ "Fechas:        " ++ show (fechaInicio c) ++ " a " ++ show (fechaFin c)
+    putStrLn $ "Vegetal:       " ++ Models.Cosecha.vegetal c
+    putStrLn $ "Cantidad (kg): " ++ show (cantidad c)
+    putStrLn $ "Estado:        " ++ show (estado c)
+    putStrLn "==========================="
 
 cerrarCosecha :: IO ()
 cerrarCosecha = do
