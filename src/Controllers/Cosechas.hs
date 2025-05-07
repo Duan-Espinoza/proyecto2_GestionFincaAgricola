@@ -152,14 +152,23 @@ verDisponibilidadParcela pid fi ff = do
 
 -- Funciones auxiliares
 -- Modificar leerCosechas para usar withFile
+-- Modificar leerCosechas para mejor manejo de errores
 leerCosechas :: IO [Cosecha]
-leerCosechas = do
+leerCosechas = handleIOError $ do
     exists <- doesFileExist cosechasPath
     if not exists 
         then return []
         else withFile cosechasPath ReadMode $ \handle -> do
             contenido <- hGetContents handle
             length contenido `seq` return (mapMaybe csvToCosecha (lines contenido))
+
+handleIOError :: IO [a] -> IO [a]
+handleIOError action = catch action handler
+    where
+        handler :: IOException -> IO [a]
+        handler e = do
+            putStrLn $ "Error accediendo al archivo de cosechas: " ++ show e
+            return []
 
 generarIdCosecha :: IO String
 generarIdCosecha = do
