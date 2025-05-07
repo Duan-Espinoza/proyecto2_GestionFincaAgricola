@@ -123,7 +123,7 @@ leerCosechas = do
         then return []
         else withFile cosechasPath ReadMode $ \handle -> do
             contenido <- hGetContents handle
-            contenido `seq` return (mapMaybe csvToCosecha (lines contenido))
+            length contenido `seq` return (mapMaybe csvToCosecha (lines contenido))
 
 generarIdCosecha :: IO String
 generarIdCosecha = do
