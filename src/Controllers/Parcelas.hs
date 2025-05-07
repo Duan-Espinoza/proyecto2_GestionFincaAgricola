@@ -22,7 +22,7 @@ import qualified Control.Exception as E
 
 -- Ruta del archivo CSV
 filePath :: FilePath
-filePath  = "C:\\Users\\geova\\Github Desktop Repos\\proyecto2_GestionFincaAgricola\\src\\data\\Parcelas.csv"
+filePath  = "src/data/Parcelas.csv"
 
 
 -- | Registrar una nueva parcela, pidiendo información al usuario.
