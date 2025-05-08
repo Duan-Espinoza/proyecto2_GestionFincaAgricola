@@ -81,6 +81,30 @@ autenticarTrabajador = do
         Nothing -> do
             putStrLn "\n Cédula no registrada. Intente de nuevo."
             autenticarTrabajador
+--Debe recibir la lista de herramientas para mostrar el menú de parcelas
+menuParcelas :: [Herramienta] -> IO ()
+menuParcelas herramientas = do
+    putStrLn "\n--- Opciones de Parcelas ---"
+    putStrLn "1. Consultar Parcela"
+    putStrLn "2. Registrar Parcela"
+    putStrLn "3. Volver"
+    putStr   "Seleccione una opción: "
+    hFlush stdout
+    opcion <- getLine
+    case opcion of
+        "1" -> do
+            parcelas <- leerParcelas []
+            consultarParcela parcelas
+            menuParcelas herramientas
+        "2" -> do
+            parcelas <- registrarParcela [] herramientas
+            menuParcelas herramientas
+        "3" -> do
+            putStrLn "\nRegresando al menú operativo..."
+            return ()
+        _   -> do
+            putStrLn "\n Opción inválida. Intente de nuevo."
+            menuParcelas herramientas
 
 -- | Muestra el menú operativo para trabajadores autenticados.
 --
@@ -117,20 +141,9 @@ menuOperativo t herramientas = do
                     menuOperativo t herramientasActualizadas
 
         "2" -> do
-            putStrLn "Menu de Parcelas"
-            putStrLn "1. Consultar Parcela"
-            putStrLn "2. Registrar Parcela"
-            putStr   "Seleccione una opción: "
-            hFlush stdout
-            opcionParcela <- getLine
-            case opcionParcela of
-                "1" -> do
-                    parcelas <- leerParcelas herramientas
-                    consultarParcela parcelas
-                    menuOperativo t herramientas
-                "2" -> do
-                    parcelas <- registrarParcela [] herramientas
-                    menuOperativo t herramientas
+            menuParcelas herramientas 
+            menuOperativo t herramientas
+            
         "3" -> do
             informeCosechas
             menuOperativo t herramientas

@@ -28,19 +28,31 @@ filePath  = "src/data/Parcelas.csv"
 -- | Registrar una nueva parcela, pidiendo información al usuario.
 registrarParcela :: [Parcela] -> [Herramienta] -> IO [Parcela]
 registrarParcela parcelas herramientas = do
-    putStrLn "\n--- Registro de Parcela ---"
-    nombre <- pedirInput "Ingrese el nombre de la parcela: "
-    zona <- pedirInput "Ingrese la zona: "
-    area <- pedirDouble "Ingrese el área de la parcela (en metros cuadrados): "
-    vegetal <- pedirInput "Ingrese el nombre del producto a sembrar: "
-    precio <- pedirInput "Ingrese el precio por kilo del vegetal: "
-    mostrarHerramientas herramientas
-    codsHerr <- pedirLista "Ingrese los códigos de herramientas a asignar (separados por comas): "
-    let herramientasSeleccionadas = filter (\h -> H.codigo h `elem` codsHerr) herramientas
-    codigoParcela <- generarCodigoParcela herramientas
-    let nuevaParcela = Parcela codigoParcela nombre zona area vegetal precio herramientasSeleccionadas
-    guardarParcela nuevaParcela
-    return (parcelas ++ [nuevaParcela]) 
+    -- Validar que la lista de herramientas no esté vacía
+    if null herramientas
+        then do
+            putStrLn "\n*** No hay herramientas registradas. Por favor, registre herramientas primero ***"
+            return parcelas
+        else do
+            
+            -- Pedir información de la nueva parcela
+            parcelas <- leerParcelas herramientas  -- Cargar parcelas existentes
+            let codigosExistentes = map codigo parcelas  -- Obtener códigos existentes para evitar duplicados
+            let codigosHerramientas = map H.codigo herramientas  -- Obtener códigos de herramientas disponibles
+
+            putStrLn "\n--- Registro de Parcela ---"
+            nombre <- pedirInput "Ingrese el nombre de la parcela: "            
+            zona <- pedirInput "Ingrese la zona: "
+            area <- pedirDouble "Ingrese el área de la parcela (en metros cuadrados): "
+            vegetal <- pedirInput "Ingrese el nombre del producto a sembrar: "
+            precio <- pedirInput "Ingrese el precio por kilo del vegetal: "
+            mostrarHerramientas herramientas
+            codsHerr <- pedirLista "Ingrese los códigos de herramientas a asignar (separados por comas): "
+            let herramientasSeleccionadas = filter (\h -> H.codigo h `elem` codsHerr) herramientas
+            codigoParcela <- generarCodigoParcela herramientas
+            let nuevaParcela = Parcela codigoParcela nombre zona area vegetal precio herramientasSeleccionadas
+            guardarParcela nuevaParcela
+            return (parcelas ++ [nuevaParcela]) -- Agregar la nueva parcela a la lista existente
 
 
 -- | Guardar una parcela en el archivo CSV
