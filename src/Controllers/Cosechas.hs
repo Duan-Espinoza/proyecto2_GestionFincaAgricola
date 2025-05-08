@@ -376,20 +376,12 @@ consultarEstadoDiarioParcelas = do
                     putStrLn $ "  " ++ show dia ++ ": " ++ if ocupada then "OCUPADA" else "Disponible"
                     
         _ -> putStrLn "Error en el formato de fechas"
-{--Informe de cosechas 
-Muestra la información de todas las cosechas registradas, con detalles como: identificador, 
-parcela, tipo de vegetal, fecha de recolección, cantidad (en kilogramos) y trabajador encargado. 
-Además, genera cinco estadísticas: 
 
-1. Parcela con mayor volumen de cosecha. 
-2. Top 3 de parcelas con mayor venta. 
-3. Trabajador con más cosechas realizadas. 
-4. Mes-Año con mayor recolección acumulada. 
-5. Cosechas con subproducción y sobreproducción
-
---}
 
 -- Nombre: informeCosechas
+-- Entrada: Ninguna directa (interacción por consola)
+-- Salida: Genera un informe de las cosechas registradas
+
 informeCosechas :: IO ()
 informeCosechas = do
     putStrLn "\n--- Informe de Cosechas ---"
@@ -417,22 +409,23 @@ informeCosechas = do
     putStrLn $ "\nTrabajador con más cosechas realizadas: " ++ trabajadorConMasCosechas
 
     
-    --Mostrar el mes-año con mayor recolección acumulada
-    let recoleccionesPorMes = foldl (\acc c -> let mesAño = (show (toGregorian (fechaInicio c))) in acc ++ [(mesAño, cantidad c)]) [] cosechas
-    let recoleccionAcumulada = foldl (\acc (mesAño, cant) -> let (mes, año) = break (== '-') mesAño in acc ++ [(mes, año, cant)]) [] recoleccionesPorMes
-    let recoleccionPorMes = foldl' (\acc (mes, año, cant) -> Map.insertWith (+) (mes, año) cant acc) Map.empty recoleccionAcumulada
-    let (mesAñoMax, maxCantidad) = maximumBy (comparing snd) (Map.toList recoleccionPorMes)
-    putStrLn $ "\nMes-Año con mayor recolección acumulada: " ++ show mesAñoMax ++ " con " ++ show maxCantidad ++ " kg"
-    
-    
-    
-    let cosechasConSubproduccion = filter (\c -> cantidad c < 0) cosechas
-    let cosechasConSobreproduccion = filter (\c -> cantidad c > 0) cosechas
-    putStrLn "\nCosechas con subproducción:"
-    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") cosechasConSubproduccion
-    putStrLn "\nCosechas con sobreproducción:"
-    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") cosechasConSobreproduccion
+    -- Muestra el mes-año con mayor recolección acumulada
+    let recoleccionesPorMes = foldl (\acc c -> 
+            let (año, mes, _) = toGregorian (fechaInicio c)
+                mesAño = show mes ++ "-" ++ show año
+            in Map.insertWith (+) mesAño (cantidad c) acc) Map.empty cosechas
+    let (mesAñoMax, maxCantidad) = maximumBy (comparing snd) (Map.toList recoleccionesPorMes)
+    putStrLn $ "\nMes y Año con mayor recolección acumulada: " ++ mesAñoMax ++ " con " ++ show maxCantidad ++ " kg"
 
+    
+    --Muestra las cosechas con subproducción y sobreproducción
+    let subproduccion = filter (\c -> cantidad c < 0) cosechas
+    let sobreproduccion = filter (\c -> cantidad c > 0) cosechas
+    putStrLn "\nCosechas con subproducción:"
+    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") subproduccion
+    putStrLn "\nCosechas con sobreproducción:"
+    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") sobreproduccion
+    putStrLn "\nInforme generado exitosamente."
 
 -- Nombre: menuGestionCosechas
 -- Entrada: Ninguna
