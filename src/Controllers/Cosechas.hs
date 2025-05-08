@@ -1,4 +1,5 @@
 -- src/Controllers/Cosechas.hs
+{-# LANGUAGE MultiWayIf #-}
 module Controllers.Cosechas (
     registrarCosecha,
     consultarCosecha,
@@ -23,6 +24,7 @@ import Text.Read (readMaybe)
 import Data.Char (toLower, isSpace)
 import Controllers.Herramientas (cargarHerramientasDefault)
 import System.IO (withFile, IOMode(..), hPutStrLn)
+import Data.Maybe (isNothing)
 
 -- Función para normalizar strings (eliminar espacios y convertir a minúsculas)
 normalizar :: String -> String
@@ -127,22 +129,107 @@ actualizarCosecha cActualizada = do
 
 modificarCosecha :: IO ()
 modificarCosecha = do
-    putStr "ID Cosecha: "
+    putStr "ID Cosecha a modificar: " >> hFlush stdout
     idC <- getLine
     cosechas <- leerCosechas
     case find ((== idC) . idCosecha) cosechas of
         Just c -> do
-            putStrLn "Funcionalidad de modificación pendiente."
+            case estado c of
+                Completada -> putStrLn "No se puede modificar una cosecha cerrada."
+                _ -> do
+                    -- Obtener nuevos datos
+                    (nuevaPid, nuevasFechas, nuevoVegetal) <- pedirDatosModificacion c
+                    
+                    -- Validar cambios
+                    resultadoValidacion <- validarModificacion c nuevaPid nuevasFechas nuevoVegetal
+                    
+                    case resultadoValidacion of
+                        Right cActualizada -> do
+                            actualizarCosecha cActualizada
+                            putStrLn "Modificación exitosa."
+                        Left mensajeError -> putStrLn mensajeError
         Nothing -> putStrLn "Cosecha no encontrada"
+
+-- Función auxiliar para pedir datos de modificación
+pedirDatosModificacion :: Cosecha -> IO (String, (Maybe Day, Maybe Day), String)
+pedirDatosModificacion c = do
+    putStrLn "\nDeje en blanco para mantener el valor actual"
+    
+    -- Obtener datos actualizados de parcelas
+    herramientas <- cargarHerramientasDefault
+    parcelas <- leerParcelas herramientas
+    
+    -- Nueva parcela
+    putStr $ "Nueva Parcela [" ++ parcelaId c ++ "]: "
+    hFlush stdout
+    nuevaPidRaw <- getLine
+    let nuevaPid = if null nuevaPidRaw then parcelaId c else nuevaPidRaw
+    
+    -- Obtener vegetal por defecto según parcela
+    let mParcela = find ((== nuevaPid) . codigo) parcelas
+    let vegetalPorDefecto = maybe (Models.Cosecha.vegetal c) P.vegetal mParcela
+    
+    -- Nuevas fechas
+    putStr $ "Nueva Fecha Inicio [" ++ show (fechaInicio c) ++ "]: "
+    hFlush stdout
+    nuevaFiStr <- getLine
+    putStr $ "Nueva Fecha Fin [" ++ show (fechaFin c) ++ "]: "
+    hFlush stdout
+    nuevaFfStr <- getLine
+    
+    -- Mostrar vegetal por defecto y pedir modificación
+    putStr $ "Nuevo Vegetal [Auto: " ++ vegetalPorDefecto ++ "]: "
+    hFlush stdout
+    nuevoVegetalRaw <- getLine
+    let nuevoVegetal = if null nuevoVegetalRaw then vegetalPorDefecto else nuevoVegetalRaw
+    
+    let nuevasFechas = (parsearFecha nuevaFiStr, parsearFecha nuevaFfStr)
+    
+    return (nuevaPid, nuevasFechas, nuevoVegetal)
+
+-- Función de validación de modificación (versión simplificada)
+validarModificacion :: Cosecha -> String -> (Maybe Day, Maybe Day) -> String -> IO (Either String Cosecha)
+validarModificacion c nuevaPid (nuevaFi, nuevaFf) _ = do  -- Eliminamos nuevoVegetal de los parámetros
+    -- Validar parcelas
+    herramientas <- cargarHerramientasDefault
+    parcelas <- leerParcelas herramientas
+    let mNuevaParcela = find ((== nuevaPid) . codigo) parcelas
+    
+    -- Obtener vegetal de la nueva parcela
+    let vegetalParcela = maybe "" P.vegetal mNuevaParcela
+    
+    -- Validar fechas
+    let fi = maybe (fechaInicio c) id nuevaFi
+    let ff = maybe (fechaFin c) id nuevaFf
+    disponible <- verDisponibilidadParcela nuevaPid fi ff
+    
+    -- Construir cosecha actualizada con vegetal de la parcela
+    let cActualizada = c {
+        parcelaId = nuevaPid,
+        fechaInicio = fi,
+        fechaFin = ff,
+        Models.Cosecha.vegetal = vegetalParcela  -- Usamos siempre el vegetal de la parcela
+    }
+    
+    -- Chequear validaciones
+    if | isNothing mNuevaParcela -> return $ Left "Parcela no válida"
+       | not disponible -> return $ Left "Parcela no disponible en esas fechas"
+       | otherwise -> return $ Right cActualizada
+
 
 cancelarCosecha :: IO ()
 cancelarCosecha = do
-    putStr "ID Cosecha: "
+    putStr "ID Cosecha: " >> hFlush stdout
     idC <- getLine
     cosechas <- leerCosechas
-    let mc = find ((== idC) . idCosecha) cosechas
-    case mc of
-        Just c -> actualizarEstado c Cancelada
+    case find ((== idC) . idCosecha) cosechas of
+        Just c -> do
+            case estado c of
+                Completada -> putStrLn "No se puede cancelar una cosecha cerrada."
+                Cancelada -> putStrLn "La cosecha ya está cancelada."
+                _ -> do
+                    actualizarEstado c Cancelada
+                    putStrLn "Cosecha cancelada exitosamente."
         Nothing -> putStrLn "Cosecha no encontrada"
 
 verDisponibilidadParcela :: String -> Day -> Day -> IO Bool
