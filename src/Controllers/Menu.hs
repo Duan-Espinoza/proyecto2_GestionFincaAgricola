@@ -33,6 +33,7 @@ import Controllers.Cosechas (menuGestionCosechas, informeCosechas)
 
 
 -- | Función principal que muestra el título del sistema y lanza el menú principal.
+
 mostrarMenuInicio :: IO ()
 mostrarMenuInicio = do
     putStrLn "\n======================================="

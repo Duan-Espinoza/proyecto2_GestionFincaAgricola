@@ -1,3 +1,46 @@
+{-|
+Módulo      : Controllers.Parcelas
+Descripción : Proporciona funcionalidad para gestionar parcelas agrícolas.
+Copyright   : (c) 2023
+Licencia    : MIT
+Mantenedor  : geovannniga32@gmail.com
+Estabilidad : experimental
+Portabilidad: POSIX
+
+Este módulo contiene funciones para registrar, consultar y gestionar parcelas agrícolas 
+utilizando un archivo CSV para almacenamiento persistente. También proporciona utilidades 
+para interactuar con herramientas asociadas a las parcelas.
+
+Funciones:
+    - 'registrarParcela': Registra una nueva parcela interactuando con el usuario.
+    - 'consultarParcela': Permite consultar una parcela por su código único.
+    - 'leerParcelas': Lee todas las parcelas desde el archivo CSV.
+    - 'csvToParcela': Convierte una línea CSV en un objeto 'Parcela'.
+
+Utilidades:
+    - 'guardarParcela': Guarda una parcela en el archivo CSV.
+    - 'buscarParcela': Busca una parcela por su código.
+    - 'mostrarParcela': Muestra información detallada de una parcela.
+    - 'parcelaToCSV': Convierte un objeto 'Parcela' en una cadena CSV.
+    - 'buscarHerramienta': Busca una herramienta por su código.
+    - 'split': Divide una cadena por un delimitador dado.
+    - 'trim': Elimina espacios en blanco al inicio y al final de una cadena.
+    - 'pedirInput': Solicita al usuario una entrada de texto.
+    - 'pedirDouble': Solicita al usuario una entrada numérica de tipo double.
+    - 'pedirLista': Solicita al usuario una lista separada por comas.
+    - 'generarCodigoParcela': Genera un código único para una nueva parcela.
+
+Dependencias:
+    - Models.Parcela: Define el tipo de datos 'Parcela'.
+    - Models.Herramienta: Define el tipo de datos 'Herramienta' y funciones relacionadas.
+    - Controllers.Herramientas: Proporciona funciones para gestionar herramientas.
+    - System.IO, System.Directory, Data.List, Data.Maybe, Data.List.Split, Data.Char: Bibliotecas estándar de Haskell para operaciones de E/S, manipulación de cadenas y listas.
+
+Notas:
+    - El módulo asume la existencia de un archivo CSV en la ruta "src/data/Parcelas.csv".
+    - La función 'generarCodigoParcela' genera códigos únicos en el formato "P####".
+    - El manejo de errores es mínimo y debería mejorarse para uso en producción.
+-}
 module Controllers.Parcelas (
     registrarParcela,
     consultarParcela,
@@ -25,7 +68,14 @@ filePath :: FilePath
 filePath  = "src/data/Parcelas.csv"
 
 
--- | Registrar una nueva parcela, pidiendo información al usuario.
+{- Nombre: registrarParcela
+   Descripción: Registra una nueva parcela en el sistema, solicitando al usuario la información necesaria.
+   Parámetros:
+       - parcelas: Lista de parcelas existentes.
+       - herramientas: Lista de herramientas disponibles.
+   Retorno: Devuelve la lista actualizada de parcelas.
+   Excepciones: Maneja errores de entrada/salida y validación de datos.
+   -}
 registrarParcela :: [Parcela] -> [Herramienta] -> IO [Parcela]
 registrarParcela parcelas herramientas = do
     -- Validar que la lista de herramientas no esté vacía
@@ -55,7 +105,13 @@ registrarParcela parcelas herramientas = do
             return (parcelas ++ [nuevaParcela]) -- Agregar la nueva parcela a la lista existente
 
 
--- | Guardar una parcela en el archivo CSV
+{-- Nombre: guardarParcela
+    Descripción: Guarda una parcela en el archivo CSV.
+    Parámetros:
+        - parcela: Parcela a guardar.
+    Retorno: IO () (acción de entrada/salida).
+    Excepciones: Maneja errores de entrada/salida.
+--}
 guardarParcela :: Parcela -> IO ()
 guardarParcela parcela = do
     putStrLn "\nGuardando parcela..."
@@ -67,8 +123,15 @@ guardarParcela parcela = do
         else do
             appendFile filePath (parcelaToCSV parcela ++ "\n")
             putStrLn "Parcela guardada."
-        
--- | Función para parsear el precio de cada vegetal en el formato: vegetal:precio
+
+{-
+    Nombre: parsePrecio
+    Descripción: Analiza una cadena de texto para extraer el nombre del vegetal y su precio.
+    Parámetros:
+        - str: Cadena de texto en formato "vegetal:precio".
+    Retorno: Tal vez una tupla (nombre del vegetal, precio).
+    Excepciones: Ninguna.
+-}
 parsePrecio :: String -> Maybe (String, Double)
 parsePrecio str =
     case break (== ':') str of
@@ -78,7 +141,14 @@ parsePrecio str =
                 _ -> Nothing
         _ -> Nothing
 
--- | Consultar una parcela por su código
+{-
+Nombre: consultarParcela
+Descripción: Permite al usuario consultar una parcela por su código.
+Parámetros:
+    - parcelas: Lista de parcelas registradas.
+Retorno: IO () (acción de entrada/salida).
+Excepciones: Maneja errores de entrada/salida.
+-}
 consultarParcela :: [Parcela] -> IO ()
 consultarParcela parcelas = do
     --Verificar lista de parcelas
@@ -96,14 +166,29 @@ consultarParcela parcelas = do
                     
                 Nothing -> putStrLn "Parcela no encontrada."
 
--- | Buscar una parcela por su código
+{-
+Nombre: buscarParcela
+Descripción: Busca una parcela por su código en una lista de parcelas.
+Parámetros:
+    - cod: Código de la parcela a buscar.
+    - parcelas: Lista de parcelas.
+
+Retorno: Parcela encontrada o Nothing si no se encuentra.
+Excepciones: Ninguna.
+-}
 buscarParcela :: String -> [Parcela] -> Maybe Parcela
 buscarParcela cod parcelas = 
     case filter (\p -> codigo p == cod) parcelas of
         [p] -> Just p
         _   -> Nothing
 
--- | Mostrar la información de una parcela
+{-
+Nombre: mostrarParcela
+Descripción: Muestra la información de una parcela en la consola.
+Parámetros:
+    - parcela: Parcela a mostrar.
+Retorno: IO () (acción de entrada/salida).
+-}
 mostrarParcela :: Parcela -> IO ()
 mostrarParcela parcela = do
     putStrLn $ "\nInformación de la Parcela:"
@@ -117,7 +202,15 @@ mostrarParcela parcela = do
     
 
 
--- | Leer las parcelas desde el archivo CSV
+{-
+Nombre: leerParcelas
+Descripción: Lee las parcelas desde el archivo CSV y las convierte en objetos Parcela.
+
+Parámetros:
+    - herramientasDisponibles: Lista de herramientas disponibles para asociar a las parcelas.
+Retorno: IO [Parcela] (lista de parcelas leídas desde el archivo).
+Excepciones: Maneja errores de entrada/salida.
+-}
 leerParcelas :: [Herramienta] -> IO [Parcela]
 leerParcelas herramientasDisponibles = do
     existe <- doesFileExist filePath
@@ -130,7 +223,13 @@ leerParcelas herramientasDisponibles = do
                     parcelas = map (flip csvToParcela herramientasDisponibles) lineas
                 return parcelas
 
--- | Convertir una parcela a formato CSV
+{-
+Nombre: parcelaToCSV
+Descripción: Convierte un objeto Parcela a una cadena CSV.
+Parámetros:
+    - parcela: Parcela a convertir.
+Retorno: Cadena CSV representando la parcela.
+-}
 parcelaToCSV :: Parcela -> String
 parcelaToCSV parcela =
     intercalate "," [
@@ -143,7 +242,14 @@ parcelaToCSV parcela =
         intercalate ";" (map H.codigo (herramientas parcela))  -- Guardar solamente el código de la herramienta
     ]
 
--- | Convertir una línea CSV a una parcela
+{-
+Nombre: csvToParcela
+Descripción: Convierte una línea CSV en un objeto Parcela.
+Parámetros:
+    - str: Línea CSV que representa una parcela.
+    - herramientasDisponibles: Lista de herramientas disponibles para asociar a la parcela.
+    Retorno: Parcela construida a partir de la línea CSV.
+-}
 csvToParcela :: String -> [Herramienta] -> Parcela
 csvToParcela str herramientasDisponibles =
     let campos = split ',' str
@@ -158,15 +264,31 @@ csvToParcela str herramientasDisponibles =
     in Parcela cod nom zon are veg pre herramientasSeleccionadas
 
 
+{-
+Nombre: buscarHerramienta
+Descripción: Busca una herramienta por su código en una lista de herramientas.
 
--- | Buscar una herramienta por su código
+Parámetros:
+    - cod: Código de la herramienta a buscar.
+    - herramientas: Lista de herramientas.
+Retorno: Herramienta encontrada o Nothing si no se encuentra.
+Excepciones: Ninguna.
+-}
 buscarHerramienta :: String -> [Herramienta] -> Maybe Herramienta
 buscarHerramienta cod herramientas = 
     case filter (\h -> H.codigo h == cod) herramientas of
         [h] -> Just h
         _   -> Nothing
 
--- | Función auxiliar para dividir una cadena por un delimitador
+{-
+Nombre: split
+Descripción: Divide una cadena en una lista de cadenas utilizando un delimitador.
+
+Parámetros:
+    - delim: Carácter delimitador.
+    - str: Cadena a dividir.
+Retorno: Lista de cadenas resultantes de la división.
+-}
 split :: Char -> String -> [String]
 split _ "" = []
 split delim str =
@@ -175,26 +297,53 @@ split delim str =
         [] -> []
         (_:xs) -> split delim xs
 
--- | Eliminar espacios sobrantes
+{-
+Nombre: trim
+Descripción: Elimina espacios en blanco al inicio y al final de una cadena.
+Parámetros:
+    - str: Cadena a limpiar.
+    
+Retorno: Cadena sin espacios en blanco al inicio y al final.
+-}
 trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
 
--- | Función auxiliar para pedir una cadena al usuario
+{-
+Nombre: pedirInput
+Descripción: Solicita al usuario una entrada de texto.
+Parámetros:
+    - prompt: Mensaje a mostrar al usuario.
+    
+Retorno: Cadena de texto ingresada por el usuario.
+-}
 pedirInput :: String -> IO String
 pedirInput prompt = do
     putStr prompt
     hFlush stdout
     getLine
-
--- | Función auxiliar para pedir un número decimal
+{-
+Nombre: pedirDouble
+Descripción: Solicita al usuario una entrada numérica de tipo double.
+Parámetros:
+    - prompt: Mensaje a mostrar al usuario.
+    
+Retorno: Valor numérico de tipo double ingresado por el usuario.
+-}
 pedirDouble :: String -> IO Double
 pedirDouble prompt = do
     putStr prompt
     hFlush stdout
     readLn
 
--- | Función auxiliar para pedir una lista separada por comas
+{-
+Nombre: pedirLista
+
+Descripción: Solicita al usuario una entrada de texto en forma de lista separada por comas.
+Parámetros:
+    - prompt: Mensaje a mostrar al usuario.
+Retorno: Lista de cadenas ingresadas por el usuario.
+-}
 pedirLista :: String -> IO [String]
 pedirLista prompt = do
     putStr prompt
@@ -203,10 +352,14 @@ pedirLista prompt = do
     return $ map trim $ splitOn "," entrada
 
 
--- | Función para generar un código único para cada parcela
--- Esta función puede ser mejorada para garantizar la unicidad, por ejemplo,
--- utilizando una base de datos o un contador persistente.
--- | Genera un nuevo código único para una parcela en formato "P####"
+{-
+Nombre: generarCodigoParcela
+Descripción: Genera un nuevo código único para una parcela.
+Parámetros:
+    - herramientas: Lista de herramientas disponibles.
+    
+Retorno: Un nuevo código de parcela en formato de cadena.
+-}
 generarCodigoParcela :: [Herramienta] -> IO String
 generarCodigoParcela herramientas = do
     putStrLn "Generando nuevo código de parcela..."

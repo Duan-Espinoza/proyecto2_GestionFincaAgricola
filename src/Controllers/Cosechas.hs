@@ -1,3 +1,46 @@
+{-|
+Module      : Controllers.Cosechas
+Description : Gestión de cosechas en una finca agrícola
+Copyright   : (c) 2023
+License     : MIT
+Maintainer  : duanolivares@estudiantec.cr
+
+
+Este módulo proporciona funciones para gestionar las cosechas en una finca agrícola. 
+Incluye funcionalidades para registrar, consultar, modificar, cerrar y cancelar cosechas, 
+así como para verificar la disponibilidad de parcelas y generar informes detallados.
+
+Funciones principales:
+- `registrarCosecha`: Registra una nueva cosecha en el sistema.
+- `consultarCosecha`: Consulta los detalles de una cosecha específica.
+- `cerrarCosecha`: Marca una cosecha como completada y registra la cantidad final recolectada.
+- `modificarCosecha`: Permite modificar los datos de una cosecha existente.
+- `cancelarCosecha`: Cambia el estado de una cosecha a "Cancelada".
+- `verDisponibilidadParcela`: Verifica si una parcela está disponible en un rango de fechas.
+- `menuGestionCosechas`: Despliega un menú interactivo para gestionar las cosechas.
+- `informeCosechas`: Genera un informe detallado de las cosechas registradas.
+
+Funciones auxiliares:
+- `consultarDisponibilidadParcelas`: Consulta la disponibilidad de parcelas en un rango de fechas.
+- `consultarEstadoDiarioParcelas`: Muestra el estado diario de las parcelas en un rango de fechas.
+- `mostrarDetalleCosecha`: Muestra los detalles de una cosecha específica.
+- `actualizarCosecha`: Actualiza los datos de una cosecha en el archivo CSV.
+- `pedirDatosModificacion`: Solicita los nuevos valores para modificar una cosecha.
+- `validarModificacion`: Valida los cambios realizados a una cosecha.
+- `actualizarEstado`: Cambia el estado de una cosecha en el archivo CSV.
+
+Restricciones generales:
+- Las fechas deben tener un formato válido (YYYY-MM-DD).
+- Los IDs de trabajadores y parcelas deben existir en el sistema.
+- Las parcelas deben estar disponibles en el rango de fechas especificado.
+- Las cantidades deben ser números positivos.
+
+Este módulo utiliza archivos CSV para almacenar los datos de las cosechas y realiza validaciones 
+para garantizar la integridad de los datos. También incluye manejo de errores para operaciones de 
+entrada/salida y proporciona estadísticas útiles sobre las cosechas registradas.
+-}
+
+
 -- src/Controllers/Cosechas.hs
 {-# LANGUAGE MultiWayIf #-}
 module Controllers.Cosechas (
