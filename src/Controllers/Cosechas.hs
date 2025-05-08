@@ -35,7 +35,15 @@ normalizar = map toLower . filter (not . isSpace)
 cosechasPath :: FilePath
 cosechasPath = "src/data/Cosechas.csv"
 
--- En Controllers/Cosechas.hs
+-- Nombre: registrarCosecha
+-- Entrada: Ninguna entrada directa (interacción por consola)
+-- Salida: Efecto secundario de registrar una nueva cosecha en archivo CSV
+-- Restricciones: 
+--   - El ID del trabajador debe existir en la lista de trabajadores iniciales.
+--   - El ID de parcela debe existir y el vegetal debe coincidir con el de la parcela.
+--   - Las fechas deben tener formato válido y la parcela debe estar disponible en ese rango.
+--   - La cantidad debe ser un número válido (positivo).
+
 registrarCosecha :: IO ()
 registrarCosecha = do
     putStrLn "\n--- Registrar Nueva Cosecha ---"
@@ -73,7 +81,11 @@ registrarCosecha = do
                 _ -> putStrLn "Error en fechas o cantidad"
         _ -> putStrLn "Validación fallida: Trabajador/Parcela/Vegetal incorrecto"
 
--- Modificar la función consultarCosecha
+-- Nombre: consultarCosecha
+-- Entrada: Ninguna entrada directa (solicita el ID de la cosecha por consola)
+-- Salida: Muestra en consola los detalles de la cosecha correspondiente
+-- Restricciones: El ID debe corresponder a una cosecha existente
+
 consultarCosecha :: IO ()
 consultarCosecha = do
     putStr "ID Cosecha: " >> hFlush stdout
@@ -95,7 +107,14 @@ mostrarDetalleCosecha c = do
     putStrLn $ "Estado:        " ++ show (estado c)
     putStrLn "==========================="
 
--- Modificar la función cerrarCosecha
+-- Nombre: cerrarCosecha
+-- Entrada: Ninguna entrada directa (solicita ID de cosecha y cantidad real por consola)
+-- Salida: Actualiza el estado de la cosecha a "Completada" y registra la cantidad final
+-- Restricciones: 
+--   - La cosecha debe existir.
+--   - No debe estar ya cancelada ni completada.
+--   - La cantidad ingresada debe ser un número positivo.
+
 cerrarCosecha :: IO ()
 cerrarCosecha = do
     putStr "ID Cosecha: " >> hFlush stdout
@@ -128,6 +147,12 @@ actualizarCosecha cActualizada = do
     withFile cosechasPath WriteMode $ \handle -> 
         hPutStr handle (unlines (map cosechaToCSV actualizadas))
 
+-- Nombre: modificarCosecha
+-- Entrada: Ninguna directa (se pide por consola el ID de la cosecha y los nuevos valores)
+-- Salida: Actualiza los datos de una cosecha en el archivo CSV
+-- Restricciones:
+--   - La cosecha debe existir y no estar en estado "Completada".
+--   - La parcela nueva debe existir y estar disponible en el nuevo rango de fechas.
 
 modificarCosecha :: IO ()
 modificarCosecha = do
@@ -218,6 +243,12 @@ validarModificacion c nuevaPid (nuevaFi, nuevaFf) _ = do  -- Eliminamos nuevoVeg
        | not disponible -> return $ Left "Parcela no disponible en esas fechas"
        | otherwise -> return $ Right cActualizada
 
+-- Nombre: cancelarCosecha
+-- Entrada: Ninguna directa (solicita por consola el ID de la cosecha)
+-- Salida: Actualiza el estado de la cosecha a "Cancelada"
+-- Restricciones:
+--   - La cosecha debe existir.
+--   - No debe estar en estado "Completada" ni "Cancelada".
 
 cancelarCosecha :: IO ()
 cancelarCosecha = do
@@ -234,14 +265,22 @@ cancelarCosecha = do
                     putStrLn "Cosecha cancelada exitosamente."
         Nothing -> putStrLn "Cosecha no encontrada"
 
+-- Nombre: verDisponibilidadParcela
+-- Entrada: 
+--   - pid: ID de la parcela (String)
+--   - fi: Fecha de inicio (Day)
+--   - ff: Fecha de fin (Day)
+-- Salida: Booleano indicando si la parcela está disponible
+-- Restricciones: Las fechas deben ser válidas. Se considera ocupada si hay solapamiento con otra cosecha.
+
 verDisponibilidadParcela :: String -> Day -> Day -> IO Bool
 verDisponibilidadParcela pid fi ff = do
     cosechas <- leerCosechas
     return $ not (any (\c -> parcelaId c == pid && solapamientoFechas c (Cosecha "" "" "" fi ff "" 0 Planificada)) cosechas)
 
 -- Funciones auxiliares
--- Modificar leerCosechas para usar withFile
--- Modificar leerCosechas para mejor manejo de errores
+-- uso withFile
+-- Lectura de CSV a Cosecha
 leerCosechas :: IO [Cosecha]
 leerCosechas = handleIOError $ do
     exists <- doesFileExist cosechasPath
@@ -330,9 +369,11 @@ consultarEstadoDiarioParcelas = do
 
 
 
--- | Función para mostrar el menú de gestión de cosechas
--- En Controllers/Cosechas.hs
--- En Controllers/Cosechas.hs
+-- Nombre: menuGestionCosechas
+-- Entrada: Ninguna
+-- Salida: Despliega menú interactivo en consola para acceder a las funcionalidades de gestión de cosechas
+-- Restricciones: La entrada debe ser un número entre 1 y 8; maneja errores de entrada mediante recursión
+
 menuGestionCosechas :: IO ()
 menuGestionCosechas = do
     putStrLn "\n--- Menú de Gestión de Cosechas ---"
