@@ -29,9 +29,11 @@ import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
 import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
 import Controllers.Parcelas (registrarParcela, consultarParcela, leerParcelas, csvToParcela)
 import Models.Herramienta (Herramienta)
+import Controllers.Cosechas (menuGestionCosechas, informeCosechas)
 
 
 -- | Función principal que muestra el título del sistema y lanza el menú principal.
+
 mostrarMenuInicio :: IO ()
 mostrarMenuInicio = do
     putStrLn "\n======================================="
@@ -80,6 +82,30 @@ autenticarTrabajador = do
         Nothing -> do
             putStrLn "\n Cédula no registrada. Intente de nuevo."
             autenticarTrabajador
+--Debe recibir la lista de herramientas para mostrar el menú de parcelas
+menuParcelas :: [Herramienta] -> IO ()
+menuParcelas herramientas = do
+    putStrLn "\n--- Opciones de Parcelas ---"
+    putStrLn "1. Consultar Parcela"
+    putStrLn "2. Registrar Parcela"
+    putStrLn "3. Volver"
+    putStr   "Seleccione una opción: "
+    hFlush stdout
+    opcion <- getLine
+    case opcion of
+        "1" -> do
+            parcelas <- leerParcelas []
+            consultarParcela parcelas
+            menuParcelas herramientas
+        "2" -> do
+            parcelas <- registrarParcela [] herramientas
+            menuParcelas herramientas
+        "3" -> do
+            putStrLn "\nRegresando al menú operativo..."
+            return ()
+        _   -> do
+            putStrLn "\n Opción inválida. Intente de nuevo."
+            menuParcelas herramientas
 
 -- | Muestra el menú operativo para trabajadores autenticados.
 --
@@ -116,22 +142,11 @@ menuOperativo t herramientas = do
                     menuOperativo t herramientasActualizadas
 
         "2" -> do
-            putStrLn "Menu de Parcelas"
-            putStrLn "1. Consultar Parcela"
-            putStrLn "2. Registrar Parcela"
-            putStr   "Seleccione una opción: "
-            hFlush stdout
-            opcionParcela <- getLine
-            case opcionParcela of
-                "1" -> do
-                    parcelas <- leerParcelas herramientas
-                    consultarParcela parcelas
-                    menuOperativo t herramientas
-                "2" -> do
-                    parcelas <- registrarParcela [] herramientas
-                    menuOperativo t herramientas
+            menuParcelas herramientas 
+            menuOperativo t herramientas
+            
         "3" -> do
-            putStrLn "\n (Informe de cosechas aún no implementado)"
+            informeCosechas
             menuOperativo t herramientas
         "4" -> menuPrincipal
         _   -> do
@@ -142,25 +157,22 @@ menuOperativo t herramientas = do
 -- | Muestra el submenú de opciones generales.
 --
 -- Incluye funcionalidades informativas como estadísticas (por implementar) e información general de la finca.
+-- | Muestra el submenú de opciones generales.
 opcionesGenerales :: IO ()
 opcionesGenerales = do
     putStrLn "\n--- Opciones Generales ---"
-    putStrLn "1. Ver estadísticas generales"
-    putStrLn "2. Ver información de la finca"
-    putStrLn "3. Volver al Menú Principal"
+    putStrLn "1. Gestión de Cosechas"
+    putStrLn "2. Volver al Menú Principal"
     putStr   "Seleccione una opción: "
     hFlush stdout
     opcion <- getLine
     case opcion of
         "1" -> do
-            putStrLn "\n (Función estadísticas aún no implementada)"
+            menuGestionCosechas
             opcionesGenerales
-        "2" -> do
-            putStrLn "\n (Función información de finca aún no implementada)"
-            opcionesGenerales
-        "3" -> menuPrincipal
+
+        "2" -> menuPrincipal
         _   -> do
             putStrLn "\n Opción inválida. Intente de nuevo."
             opcionesGenerales
-
 

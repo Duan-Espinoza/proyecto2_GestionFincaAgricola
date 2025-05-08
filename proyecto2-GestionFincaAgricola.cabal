@@ -27,8 +27,8 @@ library
     base >=4.7 && <5,
     directory,
     containers,
-    split
-    
+    split,
+    time
   default-language: Haskell2010
 
 executable proyecto2-GestionFincaAgricola
@@ -37,7 +37,9 @@ executable proyecto2-GestionFincaAgricola
     Controllers.Herramientas
     Controllers.Menu
     Controllers.Trabajadores
+    Controllers.Cosechas
     Models.Herramienta
+    Models.Cosecha
     Paths_proyecto2_GestionFincaAgricola
   hs-source-dirs: src
   ghc-options: -Wall
@@ -46,5 +48,6 @@ executable proyecto2-GestionFincaAgricola
     proyecto2-GestionFincaAgricola,
     directory,
     containers,
-    split
+    split,
+    time
   default-language: Haskell2010

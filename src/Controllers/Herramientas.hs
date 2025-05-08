@@ -21,7 +21,8 @@ separados por comas.
 
 module Controllers.Herramientas (
     cargarHerramientasDesdeArchivo
-    , mostrarHerramientas
+    , mostrarHerramientas,
+    cargarHerramientasDefault
 ) where
 
 -- Importaciones
@@ -114,3 +115,13 @@ mostrarHerramientas herramientas = do
     putStrLn "\nLista de herramientas registradas:"
     mapM_ mostrarHerramienta herramientas
 
+-- Nueva función para cargar desde ruta predeterminada
+cargarHerramientasDefault :: IO [Herramienta]
+cargarHerramientasDefault = do
+    let rutaPredeterminada = "src/data/Herramientas.csv"
+    existe <- doesFileExist rutaPredeterminada
+    if not existe
+        then return []
+        else do
+            contenido <- readFile rutaPredeterminada
+            return [h | Just h <- map parsearHerramienta (lines contenido)]
