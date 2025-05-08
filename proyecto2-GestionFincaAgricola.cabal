@@ -23,16 +23,31 @@ library
     Utils.Generadores
   hs-source-dirs: src
   ghc-options: -Wall
-  build-depends: base >=4.7 && <5
+  build-depends: 
+    base >=4.7 && <5,
+    directory,
+    containers,
+    split,
+    time
   default-language: Haskell2010
 
 executable proyecto2-GestionFincaAgricola
   main-is: Main.hs
   other-modules:
+    Controllers.Herramientas
+    Controllers.Menu
+    Controllers.Trabajadores
+    Controllers.Cosechas
+    Models.Herramienta
+    Models.Cosecha
     Paths_proyecto2_GestionFincaAgricola
   hs-source-dirs: src
   ghc-options: -Wall
   build-depends:
     base,
-    proyecto2-GestionFincaAgricola
+    proyecto2-GestionFincaAgricola,
+    directory,
+    containers,
+    split,
+    time
   default-language: Haskell2010

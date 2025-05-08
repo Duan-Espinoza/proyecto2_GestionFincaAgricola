@@ -1,0 +1,21 @@
+HR001,Desmalezadora,Elimina maleza entre cultivos,motorizada
+HR002,Pala,Para cavar y trasladar tierra,manual
+HR003,Tractor,Automatiza labores de labranza,automatizada
+HR004,Arado,Prepara el terreno para sembrar,manual
+HR005,Sembradora,Facilita la siembra de semillas,automatizada
+HR006,Rastrillo,Para nivelar el terreno,manual
+HR007,Regadera,Para regar cultivos,manual
+HR008,Carretilla,Para transportar materiales,manual
+HR009,Guantes,Protege las manos del agricultor,manual
+HR010,Cosechadora,Facilita la recolección de cultivos,automatizada
+HR011,Deshidratadora,Para conservar alimentos,automatizada
+HR012,Invernadero,Protege cultivos de condiciones climáticas adversas,manual
+HR013,Abono,Enriquece el suelo con nutrientes,manual
+HR014,Fertilizante,Enriquece el suelo con nutrientes,manual
+HR015,Insecticida,Controla plagas en cultivos,manual
+HR016,Herbicida,Controla malezas en cultivos,manual
+HR017,Plaguicida,Controla plagas en cultivos,manual
+HR018,Cinta métrica,Para medir distancias,manual
+HR019,Termómetro,Para medir temperatura,manual
+HR020,Herramienta de poda,Para podar plantas,manual
+HR021,Guadañadora,Para cortar hierbas y maleza,manual
