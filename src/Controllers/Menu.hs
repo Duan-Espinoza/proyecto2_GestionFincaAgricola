@@ -148,9 +148,7 @@ opcionesGenerales :: IO ()
 opcionesGenerales = do
     putStrLn "\n--- Opciones Generales ---"
     putStrLn "1. Gestión de Cosechas"
-    putStrLn "2. Ver estadísticas generales"
-    putStrLn "3. Ver información de la finca"
-    putStrLn "4. Volver al Menú Principal"
+    putStrLn "2. Volver al Menú Principal"
     putStr   "Seleccione una opción: "
     hFlush stdout
     opcion <- getLine
@@ -158,13 +156,8 @@ opcionesGenerales = do
         "1" -> do
             menuGestionCosechas
             opcionesGenerales
-        "2" -> do
-            putStrLn "\n (Función estadísticas aún no implementada)"
-            opcionesGenerales
-        "3" -> do
-            putStrLn "\n (Función información de finca aún no implementada)"
-            opcionesGenerales
-        "4" -> menuPrincipal
+
+        "2" -> menuPrincipal
         _   -> do
             putStrLn "\n Opción inválida. Intente de nuevo."
             opcionesGenerales

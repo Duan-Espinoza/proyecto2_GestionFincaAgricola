@@ -25,6 +25,8 @@ import Data.Char (toLower, isSpace)
 import Controllers.Herramientas (cargarHerramientasDefault)
 import System.IO (withFile, IOMode(..), hPutStrLn)
 import Data.Maybe (isNothing)
+import Control.Monad (forM_)
+import Data.List (intercalate)
 
 -- Función para normalizar strings (eliminar espacios y convertir a minúsculas)
 normalizar :: String -> String
@@ -272,7 +274,64 @@ actualizarEstado c nuevoEstado = do
         hPutStr handle (unlines (map cosechaToCSV updated))
 
 
+-- src/Controllers/Cosechas.hs
+
+-- Nueva función para consulta de disponibilidad
+consultarDisponibilidadParcelas :: IO ()
+consultarDisponibilidadParcelas = do
+    putStrLn "\n--- Consulta de Disponibilidad de Parcelas ---"
+    putStr "Fecha inicio (YYYY-MM-DD): " >> hFlush stdout
+    fiStr <- getLine
+    putStr "Fecha fin (YYYY-MM-DD): " >> hFlush stdout
+    ffStr <- getLine
+    
+    case (parsearFecha fiStr, parsearFecha ffStr) of
+        (Just fi, Just ff) -> do
+            cosechas <- leerCosechas
+            herramientas <- cargarHerramientasDefault
+            parcelas <- leerParcelas herramientas
+            
+            let disponibles = filter (\p -> 
+                    not (any (\c -> 
+                        parcelaId c == codigo p && 
+                        solapamientoFechas c (Cosecha "" "" "" fi ff "" 0 Planificada)
+                    ) cosechas)) parcelas
+                
+            putStrLn "\nParcelas disponibles en el rango:"
+            mapM_ (\p -> putStrLn $ "- " ++ codigo p ++ " (" ++ P.vegetal p ++ ")") disponibles
+            
+        _ -> putStrLn "Error en el formato de fechas"
+
+-- Función para estado diario por parcela
+consultarEstadoDiarioParcelas :: IO ()
+consultarEstadoDiarioParcelas = do
+    putStrLn "\n--- Estado Diario de Parcelas ---"
+    putStr "Fecha inicio (YYYY-MM-DD): " >> hFlush stdout
+    fiStr <- getLine
+    putStr "Fecha fin (YYYY-MM-DD): " >> hFlush stdout
+    ffStr <- getLine
+    
+    case (parsearFecha fiStr, parsearFecha ffStr) of
+        (Just fi, Just ff) -> do
+            cosechas <- leerCosechas
+            herramientas <- cargarHerramientasDefault
+            parcelas <- leerParcelas herramientas
+            
+            let dias = [fi .. ff]
+            
+            putStrLn "\nEstado de parcelas por día:"
+            forM_ parcelas $ \p -> do
+                putStrLn $ "\nParcela " ++ codigo p ++ " (" ++ P.vegetal p ++ "):"
+                forM_ dias $ \dia -> do
+                    let ocupada = any (\c -> parcelaId c == codigo p && dia >= fechaInicio c && dia <= fechaFin c) cosechas
+                    putStrLn $ "  " ++ show dia ++ ": " ++ if ocupada then "OCUPADA" else "Disponible"
+                    
+        _ -> putStrLn "Error en el formato de fechas"
+
+
+
 -- | Función para mostrar el menú de gestión de cosechas
+-- En Controllers/Cosechas.hs
 -- En Controllers/Cosechas.hs
 menuGestionCosechas :: IO ()
 menuGestionCosechas = do
@@ -282,9 +341,11 @@ menuGestionCosechas = do
     putStrLn "3. Cerrar Cosecha"
     putStrLn "4. Modificar Cosecha"
     putStrLn "5. Cancelar Cosecha"
-    putStrLn "6. Volver al Menú Principal"
+    putStrLn "6. Consultar disponibilidad parcela por rango"
+    putStrLn "7. Estado diario de parcelas"
+    putStrLn "8. Volver al Menú Principal"
     putStr "Seleccione una opción: "
-    hFlush stdout  -- <- Añadir esto para asegurar que el prompt se muestre antes de la entrada del usuario
+    hFlush stdout
     opcion <- getLine
     case opcion of
         "1" -> registrarCosecha >> menuGestionCosechas
@@ -292,5 +353,7 @@ menuGestionCosechas = do
         "3" -> cerrarCosecha >> menuGestionCosechas
         "4" -> modificarCosecha >> menuGestionCosechas
         "5" -> cancelarCosecha >> menuGestionCosechas
-        "6" -> putStrLn "Volviendo al menú principal..." >> return ()
+        "6" -> consultarDisponibilidadParcelas >> menuGestionCosechas
+        "7" -> consultarEstadoDiarioParcelas >> menuGestionCosechas
+        "8" -> putStrLn "Volviendo al menú principal..." >> return ()
         _   -> putStrLn "Opción inválida, intente nuevamente." >> menuGestionCosechas
