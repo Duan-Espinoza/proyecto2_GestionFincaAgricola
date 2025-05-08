@@ -29,7 +29,7 @@ import Controllers.Trabajadores (validarAcceso, mostrarInformacionTrabajador)
 import Controllers.Herramientas (cargarHerramientasDesdeArchivo)
 import Controllers.Parcelas (registrarParcela, consultarParcela, leerParcelas, csvToParcela)
 import Models.Herramienta (Herramienta)
-import Controllers.Cosechas (menuGestionCosechas)
+import Controllers.Cosechas (menuGestionCosechas, informeCosechas)
 
 
 -- | Función principal que muestra el título del sistema y lanza el menú principal.
@@ -132,7 +132,7 @@ menuOperativo t herramientas = do
                     parcelas <- registrarParcela [] herramientas
                     menuOperativo t herramientas
         "3" -> do
-            putStrLn "\n (Informe de cosechas aún no implementado)"
+            informeCosechas
             menuOperativo t herramientas
         "4" -> menuPrincipal
         _   -> do

@@ -7,15 +7,18 @@ module Controllers.Cosechas (
     modificarCosecha,
     cancelarCosecha,
     verDisponibilidadParcela,
-    menuGestionCosechas
+    menuGestionCosechas,
+    informeCosechas,
 ) where
 
 import Models.Cosecha
-import Models.Parcela as P (Parcela(vegetal, codigo))
+import Models.Parcela as P (Parcela(vegetal, codigo, nombre))
 import Models.Trabajador (trabajadoresIniciales, Trabajador(cedula))
 import Controllers.Parcelas (leerParcelas)
 import System.IO
-import Data.List (find, intercalate)
+import Data.List (find, intercalate, maximumBy, sortOn)
+import Data.Ord (comparing)
+import Data.Time.Calendar (fromGregorian)
 import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Time (Day)
 import System.Directory (doesFileExist)
@@ -27,6 +30,13 @@ import System.IO (withFile, IOMode(..), hPutStrLn)
 import Data.Maybe (isNothing)
 import Control.Monad (forM_)
 import Data.List (intercalate)
+import Data.List.Split (splitOn)
+import qualified Data.Map as Map
+import Data.List (foldl')
+import Data.Time.Calendar (toGregorian, fromGregorian)
+import Data.Time.Format (defaultTimeLocale, formatTime)
+import Data.Time.Calendar (addDays, diffDays)
+
 
 -- Función para normalizar strings (eliminar espacios y convertir a minúsculas)
 normalizar :: String -> String
@@ -366,7 +376,62 @@ consultarEstadoDiarioParcelas = do
                     putStrLn $ "  " ++ show dia ++ ": " ++ if ocupada then "OCUPADA" else "Disponible"
                     
         _ -> putStrLn "Error en el formato de fechas"
+{--Informe de cosechas 
+Muestra la información de todas las cosechas registradas, con detalles como: identificador, 
+parcela, tipo de vegetal, fecha de recolección, cantidad (en kilogramos) y trabajador encargado. 
+Además, genera cinco estadísticas: 
 
+1. Parcela con mayor volumen de cosecha. 
+2. Top 3 de parcelas con mayor venta. 
+3. Trabajador con más cosechas realizadas. 
+4. Mes-Año con mayor recolección acumulada. 
+5. Cosechas con subproducción y sobreproducción
+
+--}
+
+-- Nombre: informeCosechas
+informeCosechas :: IO ()
+informeCosechas = do
+    putStrLn "\n--- Informe de Cosechas ---"
+    cosechas <- leerCosechas
+    herramientas <- cargarHerramientasDefault
+    parcelas <- leerParcelas herramientas
+    
+    -- Mostrar información de todas las cosechas
+    putStrLn "\nInformación de Cosechas:"
+    forM_ cosechas $ \c -> do
+        let mParcela = find ((== parcelaId c) . codigo) parcelas
+        let parcelaNombre = maybe "Desconocida" P.nombre mParcela
+        putStrLn $ "- ID: " ++ idCosecha c ++ ", Parcela: " ++ parcelaNombre ++ ", Vegetal: " ++ Models.Cosecha.vegetal c ++ ", Fecha: " ++ show (fechaInicio c) ++ " a " ++ show (fechaFin c) ++ ", Cantidad: " ++ show (cantidad c) ++ " kg, Trabajador: " ++ trabajadorId c
+    
+    -- Aquí se pueden agregar las estadísticas solicitadas
+    let parcelaMayorVolumen = maximumBy (comparing cantidad) cosechas
+    putStrLn $ "\nParcela con mayor volumen de cosecha: " ++ idCosecha parcelaMayorVolumen ++ " con " ++ show (cantidad parcelaMayorVolumen) ++ " kg"
+    
+
+    let top3Parcelas = take 3 $ reverse $ sortOn cantidad cosechas
+    putStrLn "\nTop 3 de parcelas con mayor venta:"
+    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") top3Parcelas
+
+    let trabajadorConMasCosechas = maximumBy (comparing (\tid -> length (filter ((== tid) . trabajadorId) cosechas))) (map trabajadorId cosechas)
+    putStrLn $ "\nTrabajador con más cosechas realizadas: " ++ trabajadorConMasCosechas
+
+    
+    --Mostrar el mes-año con mayor recolección acumulada
+    let recoleccionesPorMes = foldl (\acc c -> let mesAño = (show (toGregorian (fechaInicio c))) in acc ++ [(mesAño, cantidad c)]) [] cosechas
+    let recoleccionAcumulada = foldl (\acc (mesAño, cant) -> let (mes, año) = break (== '-') mesAño in acc ++ [(mes, año, cant)]) [] recoleccionesPorMes
+    let recoleccionPorMes = foldl' (\acc (mes, año, cant) -> Map.insertWith (+) (mes, año) cant acc) Map.empty recoleccionAcumulada
+    let (mesAñoMax, maxCantidad) = maximumBy (comparing snd) (Map.toList recoleccionPorMes)
+    putStrLn $ "\nMes-Año con mayor recolección acumulada: " ++ show mesAñoMax ++ " con " ++ show maxCantidad ++ " kg"
+    
+    
+    
+    let cosechasConSubproduccion = filter (\c -> cantidad c < 0) cosechas
+    let cosechasConSobreproduccion = filter (\c -> cantidad c > 0) cosechas
+    putStrLn "\nCosechas con subproducción:"
+    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") cosechasConSubproduccion
+    putStrLn "\nCosechas con sobreproducción:"
+    mapM_ (\c -> putStrLn $ "- ID: " ++ idCosecha c ++ ", Cantidad: " ++ show (cantidad c) ++ " kg") cosechasConSobreproduccion
 
 
 -- Nombre: menuGestionCosechas
